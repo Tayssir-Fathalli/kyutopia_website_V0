@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Panier - Kyutopia</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- No <style> block here — all cart styles live in section 15 of style.css -->
+</head>
+<body>
+
+    <!-- ══════════════════════════════════════
+         LOGO SECTION
+    ══════════════════════════════════════ -->
+    <div class="logo-section">
+        <img src="images/kyutopia.png" alt="kyutopia">
+    </div>
+
+    <!-- ══════════════════════════════════════
+         MAIN CONTAINER
+    ══════════════════════════════════════ -->
+    <div class="container">
+
+        <h2 class="cart-page-title">🛒 Mon Panier</h2>
+
+        <!-- "Vider le panier" — JS toggles display via updateClearBtn() -->
+        <button id="clear-cart-btn" class="clear-cart-btn">
+            🗑️ Vider le panier
+        </button>
+
+        <!-- Cart items injected by JS -->
+        <div id="cart-container"></div>
+
+        <!-- Total + checkout — hidden until cart has items -->
+        <div id="cart-footer">
+            <div class="cart-total">Total : <span id="cart-total">0</span> DT</div>
+            <a href="order.html" class="checkout-btn" id="checkout-btn">
+                Passer la commande
+            </a>
+        </div>
+
+        <a href="index.php" class="back-link">← Continuer les achats</a>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#f9f9f9;padding:16px;text-align:center;font-size:12px;color:#aaa">
+        © Kyutopia — Handmade with love 🌸
+    </div>
+
+    <script src="cart.js"></script>
+    <script>
+
+        const container = document.getElementById('cart-container');
+        const footer    = document.getElementById('cart-footer');
+        const totalSpan = document.getElementById('cart-total');
+
+        // ── RENDER CART ────────────────────────────────────────
+        function renderCart() {
+            cart = JSON.parse(localStorage.getItem('kyutopia_cart')) || [];
+            container.innerHTML = '';
+
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="empty-cart">Ton panier est vide 🛍️</div>';
+                footer.style.display = 'none';
+                updateClearBtn();
+                return;
+            }
+
+            cart.forEach(function (item, index) {
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <img src="${item.img}" alt="${item.name}">
+                    <div class="cart-item-info">
+                        <h3>${item.name}</h3>
+                        <p>${item.price} DT</p>
+                    </div>
+                    <div class="qty-controls">
+                        <button onclick="changeQty(${index}, -1)">−</button>
+                        <span>${item.quantity}</span>
+                        <button onclick="changeQty(${index}, +1)">+</button>
+                    </div>
+                    <button class="remove-btn" onclick="removeItem(${index})">✕</button>
+                `;
+                container.appendChild(div);
+            });
+
+            const total = cart.reduce(function (sum, item) {
+                return sum + (item.price * item.quantity);
+            }, 0);
+
+            totalSpan.textContent = total;
+            footer.style.display  = 'block';
+            updateClearBtn();
+        }
+
+        // ── CHANGE QUANTITY ────────────────────────────────────
+        function changeQty(index, delta) {
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) cart.splice(index, 1);
+            saveCart();
+            updateBadge();
+            renderCart();
+        }
+
+        // ── REMOVE ITEM ────────────────────────────────────────
+        function removeItem(index) {
+            cart.splice(index, 1);
+            saveCart();
+            updateBadge();
+            renderCart();
+        }
+
+        // ── CLEAR CART BUTTON ──────────────────────────────────
+        const clearBtn = document.getElementById('clear-cart-btn');
+
+        function updateClearBtn() {
+            clearBtn.style.display = cart.length === 0 ? 'none' : 'inline-block';
+        }
+
+        clearBtn.addEventListener('click', function () {
+            if (confirm('Tu veux vraiment vider tout le panier ?')) {
+                cart = [];
+                saveCart();
+                updateBadge();
+                renderCart();
+            }
+        });
+
+        // Initial render
+        renderCart();
+
+    </script>
+</body>
+</html>

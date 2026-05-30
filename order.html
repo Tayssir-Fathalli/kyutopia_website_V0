@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order - Kyutopia</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- No <style> block — all order styles live in section 15 of style.css -->
+</head>
+<body>
+
+    <!-- ══════════════════════════════════════
+         LOGO SECTION
+    ══════════════════════════════════════ -->
+    <div class="logo-section">
+        <img src="images/kyutopia.png" alt="kyutopia">
+    </div>
+
+    <!-- ══════════════════════════════════════
+         MAIN CONTAINER
+    ══════════════════════════════════════ -->
+    <div class="container">
+
+        <div class="intro">
+            <h2>Complete Your Order</h2>
+            <p>Please fill in your information to proceed.</p>
+        </div>
+
+        <!-- ══════════════════════════════════
+             ORDER SUMMARY
+        ══════════════════════════════════ -->
+        <div id="order-summary">
+            <h3 class="order-summary__title">🛒 Récapitulatif de ta commande</h3>
+            <div id="summary-items"></div>
+            <p class="order-summary__total">
+                Total : <span id="summary-total">0</span> DT
+            </p>
+        </div>
+
+        <!-- ══════════════════════════════════
+             ORDER FORM
+        ══════════════════════════════════ -->
+        <div class="order-form">
+            <form action="submit_order.php" method="post">
+
+                <!-- Hidden fields filled by JS before submit -->
+                <input type="hidden" name="product"       id="product-hidden">
+                <input type="hidden" name="cart_quantity" id="quantity-hidden">
+
+                <label class="order-form__label">Full Name :</label>
+                <input class="order-form__input" type="text"  name="First_name" placeholder="First name" required>
+                <input class="order-form__input" type="text"  name="Last_name"  placeholder="Last name"  required>
+
+                <label class="order-form__label">Email Address :</label>
+                <input class="order-form__input" type="email" name="email" placeholder="example@example.com" required>
+
+                <label class="order-form__label">Phone Number :</label>
+                <input class="order-form__input" type="tel"   name="tel" pattern="[0-9]{8}" placeholder="8 digits" required>
+
+                <label class="order-form__label">Additional Notes :</label>
+                <textarea class="order-form__textarea" name="notes" rows="4" placeholder="Optional message..."></textarea>
+
+                <button class="order-form__submit" type="submit">Submit Order</button>
+
+            </form>
+
+            <a href="index.php" class="back-link">← Back to Products</a>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#f9f9f9;padding:16px;text-align:center;font-size:12px;color:#aaa">
+        © Kyutopia — Handmade with love 🌸
+    </div>
+
+    <script src="cart.js"></script>
+    <script>
+        const summaryItems   = document.getElementById('summary-items');
+        const summaryTotal   = document.getElementById('summary-total');
+        const productHidden  = document.getElementById('product-hidden');
+        const quantityHidden = document.getElementById('quantity-hidden');
+
+        cart = JSON.parse(localStorage.getItem('kyutopia_cart')) || [];
+
+        if (cart.length === 0) {
+            summaryItems.innerHTML =
+                '<p class="order-summary__empty">⚠️ Ton panier est vide. <a href="index.php">Retour aux produits</a></p>';
+        } else {
+            let html       = '';
+            let totalPrice = 0;
+            let totalQty   = 0;
+
+            cart.forEach(function (item) {
+                const subtotal  = item.price * item.quantity;
+                totalPrice     += subtotal;
+                totalQty       += item.quantity;
+                html           += `<p class="order-summary__item">• ${item.name} x${item.quantity} — ${subtotal} DT</p>`;
+            });
+
+            summaryItems.innerHTML   = html;
+            summaryTotal.textContent = totalPrice;
+
+            productHidden.value  = cart.map(function (item) {
+                return item.name + ' x' + item.quantity;
+            }).join(' | ');
+
+            quantityHidden.value = totalQty;
+        }
+    </script>
+
+</body>
+</html>
